@@ -1,9 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-
+#1
 inital_pla_weight = np.array([10.5, -0.32, 0.10])  # 初始化pla算法的权重
 inital_pocket_weight = np.array([0.05, 0.106, 10.07])  # 初始化pocket算法的权重
+
+
+
+#生成数据
+def prepare_data():
+    np.random.seed(10)
+    x1 = np.random.multivariate_normal([1, 0], [[1, 0], [0, 1]], 200)
+    label1 = np.ones(len(x1))
+    x2 = np.random.multivariate_normal([0, 1], [[1, 0], [0, 1]], 200)
+    label2 = np.ones(len(x2)) * -1
+    return x1, label1, x2, label2
 
 #符号函数
 def sign(x):
@@ -53,15 +64,6 @@ def train_with_pla(train_data,train_label,w0):
     return w
 
 
-#生成数据
-def prepare_data():
-    np.random.seed(10)
-    x1 = np.random.multivariate_normal([5, 0], [[1, 0], [0, 1]], 200)
-    label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 5], [[1, 0], [0, 1]], 200)
-    label2 = np.ones(len(x2)) * -1
-    return x1, label1, x2, label2
-
 #增广数据
 def data_add_one(data):
     data = np.hstack((np.ones((len(data), 1)), data))
@@ -81,7 +83,10 @@ def visualize_data_and_classfication_surface(X, y, weight_pla,weight_pocket):
     plt.scatter(X[y == -1][:, 0], X[y == -1][:, 1], c='r', marker='x', label='Class -1')
     plt.xlabel('x1')
     plt.ylabel('x2')
-    plt.title('Testing Data')
+    if(len(X)==320):
+        plt.title('Training Data')
+    else:
+        plt.title('Testing Data')
     plt.legend()
     x=np.linspace(-10,10,100)
     y1=(-weight_pla[0]-weight_pla[1]*x)/weight_pla[2]
@@ -123,7 +128,7 @@ if __name__ == '__main__':
     print("accuracy of test of pla:",calculate_accuracy(test_data,test_label,w_pla))
     print("accuracy of test of pocket:",calculate_accuracy(test_data,test_label,w_pocket))
     test_data = data_remove_one(test_data)
-
+    visualize_data_and_classfication_surface(data_remove_one(train_data),train_label,w_pla, w_pocket)
     visualize_data_and_classfication_surface(test_data, test_label,w_pla, w_pocket)
     
   
