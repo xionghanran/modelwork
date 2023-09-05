@@ -75,10 +75,14 @@ def data_remove_one(data):
 
 
 #可视化数据和分类面
-def visualize_data_and_classfication_surface(data, label, weight_pla,weight_pocket):
+def visualize_data_and_classfication_surface(X, y, weight_pla,weight_pocket):
     plt.figure()
-    plt.scatter(data[label == 1][:, 0], data[label == 1][:, 1], marker='o', color='r', label='label=1')
-    plt.scatter(data[label == -1][:, 0], data[label == -1][:, 1], marker='x', color='b', label='label=-1')
+    plt.scatter(X[y == 1][:, 0], X[y == 1][:, 1], c='b', marker='o', label='Class 1')
+    plt.scatter(X[y == -1][:, 0], X[y == -1][:, 1], c='r', marker='x', label='Class -1')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Testing Data')
+    plt.legend()
     x=np.linspace(-10,10,100)
     y1=(-weight_pla[0]-weight_pla[1]*x)/weight_pla[2]
     y2=(-weight_pocket[0]-weight_pocket[1]*x)/weight_pocket[2]
