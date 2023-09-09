@@ -7,9 +7,9 @@ wight = np.random.rand(3)
 initial_weight = np.array([0.1, 0.2, 0.3])
 #符号函数
 def sign(x):
-    if  x>=0:
+    if  x>0:
         return 1
-    elif x<0:
+    elif x<=0:
         return -1
     
 #增广数据

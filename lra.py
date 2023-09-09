@@ -58,6 +58,7 @@ def train_with_lra(train_data,train_label,wight):
     #计算train_data的广义逆矩阵
     train_data=data_add_one(train_data)
     new_train_data=np.linalg.pinv(train_data)
+    print("new_train_data:",new_train_data)
     #计算权重向量w
     wight=np.dot(new_train_data,train_label)
 
