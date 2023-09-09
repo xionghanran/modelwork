@@ -108,6 +108,17 @@ def visualize_loss(loss):
     plt.title('Training Data')
     plt.show()
 
+
+
+#统计分类正确率
+def calculate_accuracy(data,label,weight):
+    error=0
+    for i in range(len(data)):
+        if sign(np.dot(weight,data[i]))!=label[i]:
+            error+=1
+    return 1-error/len(data)
+
+    
 #主函数
 if __name__ == '__main__':
 
@@ -119,10 +130,12 @@ if __name__ == '__main__':
     
     #输出广义逆的结果
     print("train_with_lra of weight:",train_with_lra(train_data,train_label,weight))
+    print("calculate_accuracy of lra:",calculate_accuracy(data_add_one(train_data),train_label,train_with_lra(train_data,train_label,weight)))
     visualize_classification(train_data,train_label,train_with_lra(train_data,train_label,weight))
     #输出梯度下降的结果
     gd_weight,loss_list=gradient_descent(data_add_one(train_data),train_label,weight,0.001,0.9999,1000)
     print("train_with_gd:weight:",gd_weight)  
+    print("calculate_accuracy of gd:",calculate_accuracy(data_add_one(train_data),train_label,gd_weight))
     visualize_classification(train_data,train_label,gd_weight)
     #输出损失函数
     visualize_loss(loss_list)
