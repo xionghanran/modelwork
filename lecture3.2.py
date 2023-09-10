@@ -8,11 +8,10 @@ weight = np.array([0.01, 0.02, 0.62])
 #生成数据
 def prepare_data():
     np.random.seed(10)
-    x1 = np.random.multivariate_normal([5, 0], [[1, 0], [0, 1]], 200)
+    x1 = np.random.multivariate_normal([3, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 5], [[1, 0], [0, 1]], 200)
+    x2 = np.random.multivariate_normal([0, 3], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
-   
     return x1, label1, x2, label2
 
 #符号函数
@@ -40,6 +39,7 @@ def train_with_lra(train_data,train_label,wight):
     #print("new_train_data:",new_train_data)
     #计算权重向量w
     wight=np.dot(new_train_data,train_label)
+    # print(weight)
     return wight
 
 '''存在bug'''
@@ -62,6 +62,7 @@ def gradient(data,label,weight):
 
 
 #梯度下降
+'''
 def gradient_descent(data, label, weight, initial_lr, decay_rate, stages):
     loss_list = []
     lr = initial_lr
@@ -74,8 +75,22 @@ def gradient_descent(data, label, weight, initial_lr, decay_rate, stages):
         grad = gradient(data, label, weight)
         weight -= lr * grad  # 更新权重
         lr *= decay_rate  # 学习率衰减
+    return weight, loss_list'''
+#梯度下降算法
+def gradient_descent(data, label, weight, initial_lr, decay_rate, epoch, batch_size):
+    loss_list = []
+    lr = initial_lr
+    num_samples = len(data)
+    for i in range(epoch):
+        for j in range(0, num_samples, batch_size):
+            batch_data = data[j:j+batch_size]
+            batch_label = label[j:j+batch_size]
+            loss = loss_function(batch_data, batch_label, weight)
+            loss_list.append(loss)
+            grad = gradient(batch_data, batch_label, weight)
+            weight -= lr * grad
+        lr *= decay_rate
     return weight, loss_list
-
 
 #可视化样本和分类面
 def visualize_classification(X, y, w):
@@ -109,7 +124,6 @@ def visualize_loss(loss):
     plt.show()
 
 
-
 #统计分类正确率
 def calculate_accuracy(data,label,weight):
     error=0
@@ -121,21 +135,27 @@ def calculate_accuracy(data,label,weight):
     
 #主函数
 if __name__ == '__main__':
-
+    start = datetime.datetime.now()
     x1, label1, x2, label2 = prepare_data()
     train_data = np.vstack((x1[:160], x2[:160]))
     train_label = np.hstack((label1[:160], label2[:160]))
     test_data = np.vstack((x1[160:], x2[160:]))
     test_label = np.hstack((label1[160:], label2[160:]))
-    
+    #超参数
+    batch_size=320
+    epoch = 1000
+    initial_lr, decay_rate = 0.001 , 0.999
     #输出广义逆的结果
-    print("train_with_lra of weight:",train_with_lra(train_data,train_label,weight))
-    print("calculate_accuracy of lra:",calculate_accuracy(data_add_one(train_data),train_label,train_with_lra(train_data,train_label,weight)))
-    visualize_classification(train_data,train_label,train_with_lra(train_data,train_label,weight))
+    #print("train_with_lra of weight:",train_with_lra(train_data,train_label,weight))
+    #print("calculate_accuracy of lra:",calculate_accuracy(data_add_one(train_data),train_label,train_with_lra(train_data,train_label,weight)))
+    #visualize_classification(train_data,train_label,train_with_lra(train_data,train_label,weight))
     #输出梯度下降的结果
-    gd_weight,loss_list=gradient_descent(data_add_one(train_data),train_label,weight,0.001,0.9999,1000)
+    gd_weight,loss_list=gradient_descent(data_add_one(train_data),train_label,weight,initial_lr, decay_rate,epoch,batch_size)
     print("train_with_gd:weight:",gd_weight)  
     print("calculate_accuracy of gd:",calculate_accuracy(data_add_one(train_data),train_label,gd_weight))
+    end = datetime.datetime.now()
+    print('totally time of pocket is ', end - start)
     visualize_classification(train_data,train_label,gd_weight)
     #输出损失函数
     visualize_loss(loss_list)
+
