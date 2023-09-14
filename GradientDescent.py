@@ -32,6 +32,7 @@ def loss_function(data, label, weight):
         loss += (label[i] - np.dot(weight, data[i])) ** 2
     #print(loss/len(data))
     return loss/len(data)
+
 #梯度
 def gradient(data,label,weight):
     grad=0
@@ -67,6 +68,9 @@ def visualize_loss(loss):
 
 
 train_data = data_add_one(train_data)
-weight,loss_list=gradient_descent(train_data,train_label,initial_weight,0.001,0.999,1000)
+weight=gradient_descent(train_data,train_label,initial_weight,0.001,0.999,1000)[0]
+loss_list = gradient_descent(train_data, train_label, initial_weight, 0.001, 0.999, 1000)[1]
+
 visualize_loss(loss_list)
+
 
