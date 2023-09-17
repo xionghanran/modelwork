@@ -4,11 +4,20 @@ inital_Logistic_weight = np.array([0, 1, 1])
 #生成数据
 def prepare_data():
     np.random.seed(10)
-    x1 = np.random.multivariate_normal([2, 0], [[1, 0], [0, 1]], 200)
+    x1 = np.random.multivariate_normal([3, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 2], [[1, 0], [0, 1]], 200)
+    x2 = np.random.multivariate_normal([0, 3], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
     return x1, label1, x2, label2
+
+#损失函数
+def loss_function(data, label, weight):
+    '''Logistic Regression算法的损失函数'''
+    loss = 0
+    for i in range(len(data)):
+        loss += np.log(1 + np.exp(-label[i] * np.dot(weight, data[i])))
+    return loss / len(data)
+
 
 #增广数据
 def data_add_one(data):
@@ -41,12 +50,20 @@ def gradient(data, label, weight):
 
 
 # logistic 回归梯度下降算法
-def LogisticRegression(train_data, train_label, weight, lr, stages):
-    w = weight
-    for i in range(stages):
-        for j in range(len(train_data)):
-            w = w - lr * gradient(train_data, train_label, w)
-    return w
+def LogisticRegression(data,label, weight, lr, stages,batch_size):
+    loss_list = []
+    
+    num_samples = len(data)
+    for i in range(epoch):
+        for j in range(0, num_samples, batch_size):
+            batch_data = data[j:j+batch_size]
+            batch_label = label[j:j+batch_size]
+            loss = loss_function(batch_data, batch_label, weight)
+            loss_list.append(loss)
+            grad = gradient(batch_data, batch_label, weight)
+            weight = weight - lr * gradient(batch_data, batch_label, weight)
+        
+    return weight, loss_list
 
 #可视化数据和分类面
 def visualize_classification(X, y, w):
@@ -67,6 +84,16 @@ def visualize_classification(X, y, w):
     predicted_labels = np.sign(np.dot(grid_points_aug, w))
     predicted_labels = predicted_labels.reshape(xx1.shape)
     plt.contourf(xx1, xx2, predicted_labels, alpha=0.2, cmap='coolwarm')
+    plt.show()
+
+#可视化损失函数 
+def visualize_loss(loss):
+    plt.figure()
+    x = np.arange(0, len(loss))
+    plt.plot(x, loss)
+    plt.xlabel('epoch')
+    plt.ylabel('loss_value')
+    plt.title('Training Data')
     plt.show()
 
 #统计分类正确率
@@ -98,10 +125,15 @@ if __name__ == '__main__':
     test_label = np.hstack((label1[160:], label2[160:]))
     #print("hello world")
     lr = 0.01
-    stages = 20
-    w_logistic = LogisticRegression(train_data, train_label, inital_Logistic_weight, lr, stages)
+    epoch = 1000
+    batch_size=320
+    w_logistic,loss_list = LogisticRegression(train_data, train_label, inital_Logistic_weight, lr, epoch,batch_size)
     print("w_logistic:", w_logistic)
     print("accuracy of train of logistic:", calculate_accuracy(train_data, train_label, w_logistic))
+    print("accuracy of test of logistic:", calculate_accuracy(test_data, test_label, w_logistic))
     visualize_classification(data_remove_one(train_data), train_label, w_logistic)
+    visualize_classification(data_remove_one(test_data), test_label, w_logistic)
+    visualize_loss(loss_list)
+    
 
 
