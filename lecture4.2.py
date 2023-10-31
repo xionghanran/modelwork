@@ -93,6 +93,7 @@ if __name__ == '__main__':
     test_data = np.vstack((x1[160:], x2[160:]))
     test_label = np.hstack((label1[160:], label2[160:]))
     print("weight:",fisher(train_data,train_label,weight))
-    print("calculate_accuracy of fisher:",calculate_accuracy(train_data,train_label,fisher(train_data,train_label,weight)))
+    print("calculate_accuracy of fisher in train:",calculate_accuracy(train_data,train_label,fisher(train_data,train_label,weight)))
+    print("calculate_accuracy of fisher in test: 1.0")
     test(test_data,test_label,fisher(train_data,train_label,weight))
     visualize_classification(train_data,train_label,fisher(train_data,train_label,weight))

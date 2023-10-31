@@ -8,9 +8,9 @@ weight = np.array([0.01, 0.02, 0.62])
 #生成数据
 def prepare_data():
     np.random.seed(10)
-    x1 = np.random.multivariate_normal([3, 0], [[1, 0], [0, 1]], 200)
+    x1 = np.random.multivariate_normal([1, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 3], [[1, 0], [0, 1]], 200)
+    x2 = np.random.multivariate_normal([0, 1], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
     return x1, label1, x2, label2
 
@@ -142,9 +142,9 @@ if __name__ == '__main__':
     test_data = np.vstack((x1[160:], x2[160:]))
     test_label = np.hstack((label1[160:], label2[160:]))
     #超参数
-    batch_size=320
+    batch_size=160
     epoch = 1000
-    initial_lr, decay_rate = 0.001 , 0.999
+    initial_lr, decay_rate = 0.01 , 0.99
     #输出广义逆的结果
     print("train_with_lra of weight:",train_with_lra(train_data,train_label,weight))
     print("calculate_accuracy of lra:",calculate_accuracy(data_add_one(train_data),train_label,train_with_lra(train_data,train_label,weight)))

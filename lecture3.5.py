@@ -131,7 +131,7 @@ def Adam(x_init, learning_rate, num_iterations):
     x_values = [x_init]
     f_values = [f(x_init)]
     m0=0
-    λ=0.9
+    λ=0.99
     v0=0
     β=0.999
     for i in range(num_iterations):

@@ -1,3 +1,4 @@
+#pla算法的python实现
 import numpy as np
 import matplotlib.pyplot as plt
 

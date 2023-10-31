@@ -4,9 +4,9 @@ inital_Logistic_weight = np.array([0, 1, 1])
 #生成数据
 def prepare_data():
     np.random.seed(10)
-    x1 = np.random.multivariate_normal([3, 0], [[1, 0], [0, 1]], 200)
+    x1 = np.random.multivariate_normal([5, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 3], [[1, 0], [0, 1]], 200)
+    x2 = np.random.multivariate_normal([0, 5], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
     return x1, label1, x2, label2
 

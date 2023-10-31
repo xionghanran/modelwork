@@ -10,9 +10,9 @@ inital_pocket_weight = np.array([0.05, 0.106, 10.07])  # 初始化pocket算法�
 #生成数据
 def prepare_data():
     np.random.seed(10)
-    x1 = np.random.multivariate_normal([5, 0], [[1, 0], [0, 1]], 200)
+    x1 = np.random.multivariate_normal([1, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
-    x2 = np.random.multivariate_normal([0, 5], [[1, 0], [0, 1]], 200)
+    x2 = np.random.multivariate_normal([0, 1], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
     return x1, label1, x2, label2
 
