@@ -17,8 +17,9 @@ test_loader = torch.utils.data.DataLoader(mnist_test, batch_size=256, shuffle=Fa
 
 def Softmax(x):
     return torch.exp(x) / torch.sum(torch.exp(x), dim=1).view(-1, 1)
-
+#lenet模型
 class LeNet(nn.Module):
+    #定义网络结构
     def __init__(self):
         super(LeNet, self).__init__()
         self.conv1 = nn.Sequential(nn.Conv2d(1, 6, 5, padding=2,stride=1), nn.Sigmoid(), nn.AvgPool2d(2,stride=2))
@@ -34,7 +35,7 @@ class LeNet(nn.Module):
         x = self.fc2(x)
         x = self.fc3(x)
         return Softmax(x)
-    
+#训练模型
 def train(net, train_loader, test_loader, loss, num_epochs, updater):
     loss_list = []
     train_acc_list = []

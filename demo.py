@@ -1,97 +1,89 @@
-import torch
-import torch.nn as nn
-import torchvision
-import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
 import numpy as np
-import IPython as ipy
-import cv2
+from scipy.optimize import minimize
 
-mnist_train = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transforms.ToTensor())
-mnist_test = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transforms.ToTensor())
+def svm_gaussian_kernel(X, y, C, gamma):
+    n_samples, n_features = X.shape
 
-train_loader = torch.utils.data.DataLoader(mnist_train, batch_size=100, shuffle=True, num_workers=2)
-test_loader = torch.utils.data.DataLoader(mnist_test, batch_size=100, shuffle=False, num_workers=2)
+    # 计算高斯核矩阵
+    def gaussian_kernel_matrix(X):
+        pairwise_sq_dists = np.square(np.linalg.norm(X[:, np.newaxis] - X, axis=2))
+        K = np.exp(-gamma * pairwise_sq_dists)
+        return K
 
-W = torch.normal(0, 0.01, size=(784, 10), requires_grad=True)
-b = torch.zeros(10, requires_grad=True)
+    # 定义目标函数
+    def objective(alpha):
+        return 0.5 * np.dot(alpha, np.dot(K, alpha)) - np.sum(alpha)
 
-W1 = torch.normal(0, 0.01, size=(784, 128), requires_grad=True)
-b1 = torch.zeros(128, requires_grad=True)
-W2 = torch.normal(0, 0.01, size=(128, 10), requires_grad=True)
-b2 = torch.zeros(10, requires_grad=True)
+    # 定义约束条件
+    def constraint(alpha):
+        return np.dot(y, alpha)
 
-def Softmax(x):
-    return torch.exp(x) / torch.sum(torch.exp(x), dim=1).view(-1, 1)
+    # 初始化拉格朗日乘子向量
+    alpha0 = np.zeros(n_samples)
 
+    # 计算高斯核矩阵
+    K = gaussian_kernel_matrix(X)
 
-def model(x):
-    x = x.reshape(-1, 784)
-    y = torch.matmul(x, W) + b 
-    return Softmax(y)
+    # 定义约束条件的字典形式
+    constraints = {'type': 'eq', 'fun': constraint}
 
-def model_2(x):
-    x = x.reshape(-1, 784)
-    y = torch.matmul(x, W1) + b1 
-    y = torch.relu(y)
-    y = torch.matmul(y, W2) + b2 
-    return Softmax(y)
+    # 使用二次规划函数求解
+    res = minimize(objective, alpha0, constraints=constraints)
 
+    # 提取最优拉格朗日乘子向量
+    alpha = res.x
 
-def cross_entropy(y_hat, y):
-    return - torch.log(y_hat[range(y.shape[0]), y]).mean()
+    # 计算权重向量
+    w = np.dot(alpha * y, X)
 
-def accuracy(y_hat, y):
-    if len(y_hat.shape) > 1 and y_hat.shape[1] > 1:
-        y_hat = torch.argmax(y_hat, dim=1)
-    cmp = y_hat.type(y.dtype) == y
-    return float(torch.sum(cmp.type(y.dtype)))
+    # 找到支持向量
+    support_vectors = X[alpha > 0]
 
-def evaluate_accuracy(data_loader, net):
-    acc_sum, n = 0.0, 0
-    for x, y in data_loader:
-        pred = net(x)
-        acc_sum += accuracy(pred, y)
-        n += 1
-    return acc_sum / n
+    return w, support_vectors
 
-def train(net, train_loader, test_loader, loss, num_epochs, updater):
-    for epoch in range(num_epochs):
-        train_loss_sum, train_acc_sum, n = 0.0, 0.0, 0
-        for x, y in train_loader:
-            y_hat = net(x)
-            l = loss(y_hat, y).sum()
-            l.requires_grad_(True)  
-            updater.zero_grad()
-            l.backward()
-            updater.step()
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
-            train_loss_sum += l
-            train_acc_sum += accuracy(y_hat, y)
-            n += x.shape[0]
-        test_acc = evaluate_accuracy(test_loader, net)
-        print('epoch %d, loss %.4f, train acc %.3f, test acc %.3f' % (epoch + 1, train_loss_sum / n, train_acc_sum / n, test_acc/100))
-    return net
+# 生成示例数据
+X, y = make_classification(n_samples=100, n_features=2, n_informative=2, n_redundant=0, random_state=42)
 
-def test(net, test_loader):
-    # net.eval()
-    with torch.no_grad():
-        for images, labels in test_loader:
-            outputs = net(images)
-            _, predicted = torch.max(outputs.data, 1)
-            for i in range(10):
-                plt.imshow(images[i].squeeze(), cmap='gray')
-                plt.title(f"Predicted: {predicted[i]}, Actual: {labels[i]}")
-                plt.show()
+# 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-if __name__ == '__main__':
-    num_epochs, lr = 5, 0.1
-    updater = torch.optim.SGD([W1, b1, W2, b2], lr=lr,momentum=0.9)
-    '''训练model_2'''
-    print('训练model_2')
-    result = train(model_2, train_loader, test_loader, cross_entropy, num_epochs, updater)
-    '''测试model_2'''
-    print('测试model_2')
-    test(result, test_loader)
+# 训练支持向量机模型
+model = SVC(kernel='rbf')
+model.fit(X_train, y_train)
 
+# 绘制分类面和样本
+plt.figure(figsize=(8, 6))
 
+# 绘制样本点
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm', edgecolors='k')
+
+# 绘制分类面
+ax = plt.gca()
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+
+# 创建网格来评估模型
+xx = np.linspace(xlim[0], xlim[1], 100)
+yy = np.linspace(ylim[0], ylim[1], 100)
+YY, XX = np.meshgrid(yy, xx)
+xy = np.vstack([XX.ravel(), YY.ravel()]).T
+Z = model.decision_function(xy).reshape(XX.shape)
+
+# 绘制分类面的等高线
+ax.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5, linestyles=['--', '-', '--'])
+
+# 设置坐标轴标签
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+
+# 设置图例
+plt.legend(['Class 0', 'Class 1'])
+
+# 显示图形
+plt.show()

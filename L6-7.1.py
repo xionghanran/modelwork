@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
-
+#svm_primal模型
 def svm_primal(X, y, C):
     n_samples, n_features = X.shape
 
@@ -27,7 +27,7 @@ def svm_primal(X, y, C):
 
     return w
 
-
+#对偶模型
 def svm_dual(X, y, C):
     n_samples, n_features = X.shape
 
@@ -63,7 +63,7 @@ def svm_dual(X, y, C):
 
     return weights
 
-
+#核函数模型
 def svm_kernel(X, y, C, kernel):
     n_samples, n_features = X.shape
 
@@ -133,15 +133,18 @@ def plot_decision_boundary(X, y, weights):
     plt.show()
 
 
-
 def prepare_data():
-    np.random.seed(10)
+    np.random.seed(0)
     x1 = np.random.multivariate_normal([3, 0], [[1, 0], [0, 1]], 200)
     label1 = np.ones(len(x1))
     x2 = np.random.multivariate_normal([0, 3], [[1, 0], [0, 1]], 200)
     label2 = np.ones(len(x2)) * -1
     return x1, label1, x2, label2
 
+#统计正确率
+def accuracy(X, y, weights):
+    y_pred = np.sign(np.dot(X, weights))
+    return np.sum(y_pred == y) / len(y)
 
 if __name__ == '__main__':
     x1, label1, x2, label2 = prepare_data()
@@ -155,16 +158,20 @@ if __name__ == '__main__':
     # 调用函数进行训练
     weights = svm_primal(train_data, train_label, C)
     print("svm_primal权重向量:", weights)
+    print("svm_primal训练集正确率:", accuracy(train_data, train_label, weights))
     #可视化数据和决策边界
     plot_decision_boundary(train_data, train_label, weights)
 
     weights = svm_dual(train_data, train_label, C)
     print("svm_dual权重向量:", weights)
+    print("svm_dual训练集正确率:", accuracy(train_data, train_label, weights))
+    
     #可视化数据和决策边界
     plot_decision_boundary(train_data, train_label, weights)
     '''
     weights = svm_kernel(train_data, train_label, C, gaussian_kernel)
     print("svm_kernel权重向量:", weights)
+    
     #可视化数据和决策边界
     plot_decision_boundary2(train_data, train_label, weights, gaussian_kernel)
     '''
